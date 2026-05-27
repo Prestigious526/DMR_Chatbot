@@ -1,0 +1,403 @@
+{
+  "P1": {
+    "name": "Dead Unit",
+    "description": "Follow when the radio set fails to turn ON",
+    "start": "p1_s1",
+    "states": {
+      "p1_s1": {
+        "question": "Check the battery voltage. Is the battery sufficiently charged?",
+        "test_point": null,
+        "target": null,
+        "yes": "p1_s2",
+        "no": "p1_charge"
+      },
+      "p1_charge": {
+        "result": true,
+        "component": "Battery (Low Charge)",
+        "action": "Charge the battery fully, then retry powering on the unit.",
+        "ok": false
+      },
+      "p1_s2": {
+        "question": "Measure voltage at test point TP 34. Does it read ~7.4V (nominal battery voltage)?",
+        "test_point": "TP 34",
+        "target": "~7.4V",
+        "yes": "p1_s3",
+        "no": "p1_battery_conn"
+      },
+      "p1_battery_conn": {
+        "result": true,
+        "component": "Battery Connection",
+        "action": "Battery voltage absent at TP 34. Check and reseat the battery connector/contacts.",
+        "ok": false
+      },
+      "p1_s3": {
+        "question": "Check voltage rails at TP 35 and TP 36. Do you read 3.6V at TP 35 AND 5V at TP 36?",
+        "test_point": "TP 35 / TP 36",
+        "target": "3.6V and 5V",
+        "yes": "p1_s4",
+        "no": "p1_u24"
+      },
+      "p1_u24": {
+        "result": true,
+        "component": "U24 (Power Regulator)",
+        "action": "Voltage rails at TP 35 / TP 36 are absent or incorrect. Component U24 is faulty — replace it.",
+        "ok": false
+      },
+      "p1_s4": {
+        "question": "Check voltage at resistor R55. Is the 3.3V logic supply line present?",
+        "test_point": "R55",
+        "target": "3.3V",
+        "yes": "p1_u29",
+        "no": "p1_r55_down"
+      },
+      "p1_r55_down": {
+        "question": "3.3V absent at R55. Does the screen remain unresponsive even after tracing downstream components?",
+        "test_point": null,
+        "target": null,
+        "yes": "p1_display",
+        "no": "p1_display"
+      },
+      "p1_u29": {
+        "result": true,
+        "component": "U29 Component",
+        "action": "3.3V line present but unit still dead. U29 component is faulty — replace it.",
+        "ok": false
+      },
+      "p1_display": {
+        "result": true,
+        "component": "Display Assembly",
+        "action": "Core power rails valid but screen unresponsive. Validate the display assembly using a specialized test jig. Replace display if faulty.",
+        "ok": false
+      }
+    }
+  },
+
+  "P2": {
+    "name": "BITE Module Check",
+    "description": "Used to check failure of any module via internal diagnostics",
+    "start": "p2_init",
+    "states": {
+      "p2_init": {
+        "question": "Connect battery and antenna. Power ON the radio and navigate to Menu -> iBITE. Is iBITE selected and running?",
+        "test_point": null,
+        "target": null,
+        "yes": "p2_s2",
+        "no": "p2_power_first"
+      },
+      "p2_power_first": {
+        "result": true,
+        "component": "Unit Not Powering On",
+        "action": "Unit must power on before running BITE. Run Procedure P1 (Dead Unit) first.",
+        "ok": false
+      },
+      "p2_s2": {
+        "question": "Does the display show BB:OK?",
+        "test_point": "Display",
+        "target": "BB:OK",
+        "yes": "p2_s3",
+        "no": "p2_bb_fail"
+      },
+      "p2_bb_fail": {
+        "result": true,
+        "component": "Baseband Card SCT",
+        "action": "BB check failed. Reprogram the SCT in the Baseband card. If fault persists, replace the Baseband card.",
+        "ok": false
+      },
+      "p2_s3": {
+        "question": "Does the display show RF:OK?",
+        "test_point": "Display",
+        "target": "RF:OK",
+        "yes": "p2_s4",
+        "no": "p2_rf_fail"
+      },
+      "p2_rf_fail": {
+        "result": true,
+        "component": "RF Path / RTC / SPI Flash (SM Card)",
+        "action": "RF check failed. Check the RF path and reprogram SCT. RTC or SPI Flash in SM Card may be faulty.",
+        "ok": false
+      },
+      "p2_s4": {
+        "question": "Does the display show F:1?",
+        "test_point": "Display",
+        "target": "F:1",
+        "yes": "p2_fpga",
+        "no": "p2_s5"
+      },
+      "p2_fpga": {
+        "result": true,
+        "component": "FPGA (SM Card)",
+        "action": "F:1 indicates FPGA fault. The FPGA in the SM Card is faulty — replace the SM Card.",
+        "ok": false
+      },
+      "p2_s5": {
+        "question": "Does the display show S:1?",
+        "test_point": "Display",
+        "target": "S:1",
+        "yes": "p2_spi",
+        "no": "p2_s6"
+      },
+      "p2_spi": {
+        "result": true,
+        "component": "SPI Flash (SM Card)",
+        "action": "S:1 indicates SPI Flash fault. The SPI Flash in the SM Card is faulty — replace the SM Card.",
+        "ok": false
+      },
+      "p2_s6": {
+        "question": "Does the display show R:1?",
+        "test_point": "Display",
+        "target": "R:1",
+        "yes": "p2_rtc",
+        "no": "p2_pass"
+      },
+      "p2_rtc": {
+        "result": true,
+        "component": "RTC Real-Time Clock (SM Card)",
+        "action": "R:1 indicates RTC fault. The RTC in the SM Card is faulty — replace the SM Card.",
+        "ok": false
+      },
+      "p2_pass": {
+        "result": true,
+        "component": "All Modules — PASS",
+        "action": "BITE check complete. No active module faults detected. Built-in diagnostics passed.",
+        "ok": true
+      }
+    }
+  },
+
+  "P3": {
+    "name": "Display / Keypad",
+    "description": "Locates faults related to display errors or keypad input",
+    "start": "p3_s1",
+    "states": {
+      "p3_s1": {
+        "question": "Connect battery and antenna, then power ON the radio. Does the radio power on?",
+        "test_point": null,
+        "target": null,
+        "yes": "p3_s2",
+        "no": "p3_dead"
+      },
+      "p3_dead": {
+        "result": true,
+        "component": "Unit Not Powering On",
+        "action": "Run Procedure P1 (Dead Unit) first — unit must power on before diagnosing display/keypad.",
+        "ok": false
+      },
+      "p3_s2": {
+        "question": "Does the display show proper characters?",
+        "test_point": "Display",
+        "target": "Proper characters",
+        "yes": "p3_s4",
+        "no": "p3_s3"
+      },
+      "p3_s3": {
+        "question": "Is the display showing missing or unwanted/garbled characters?",
+        "test_point": "Display",
+        "target": null,
+        "yes": "p3_display_fault",
+        "no": "p3_display_ok"
+      },
+      "p3_display_fault": {
+        "result": true,
+        "component": "Display Cable / Display Assembly",
+        "action": "Check proper connection of the display cable. If connection is good, the display is faulty — replace the display assembly.",
+        "ok": false
+      },
+      "p3_display_ok": {
+        "result": true,
+        "component": "Display — OK",
+        "action": "Display is confirmed functional.",
+        "ok": true
+      },
+      "p3_s4": {
+        "question": "Navigate to Menu -> Message -> Compose and test all keys. Is digit display proper when keys are pressed?",
+        "test_point": "Keypad",
+        "target": "Correct digit on press",
+        "yes": "p3_ok",
+        "no": "p3_keypad"
+      },
+      "p3_keypad": {
+        "result": true,
+        "component": "Keypad / Keypad Cable",
+        "action": "Digit display incorrect on keypress. Keypad or Keypad Cable is faulty — check cable connection, then replace keypad if needed.",
+        "ok": false
+      },
+      "p3_ok": {
+        "result": true,
+        "component": "Keypad and Display — OK",
+        "action": "Keypad and Display are confirmed fully functional.",
+        "ok": true
+      }
+    }
+  },
+
+  "P4": {
+    "name": "Receiver (Rx) Path",
+    "description": "Followed whenever there is no reception in the radio set",
+    "start": "p4_s2",
+    "states": {
+      "p4_s2": {
+        "question": "Switch ON radio and enable the RF channel. Is the RSSI indicator displayed?",
+        "test_point": "Display RSSI",
+        "target": "RSSI visible",
+        "yes": "p4_audio",
+        "no": "p4_s3"
+      },
+      "p4_audio": {
+        "question": "RSSI is present. Check audio signal at capacitor C21. Is audio present at C21?",
+        "test_point": "C21",
+        "target": "Audio signal present",
+        "yes": "p4_speaker",
+        "no": "p4_u4_rx"
+      },
+      "p4_speaker": {
+        "result": true,
+        "component": "Speaker",
+        "action": "Audio signal present at C21 but no output. The Speaker is faulty — replace the speaker assembly.",
+        "ok": false
+      },
+      "p4_u4_rx": {
+        "result": true,
+        "component": "U4 (RF/Audio IC)",
+        "action": "RSSI present but no audio at C21. U4 is faulty — replace it.",
+        "ok": false
+      },
+      "p4_s3": {
+        "question": "No RSSI. Check Local Oscillator frequency at capacitor C114. Is the L.O. frequency correct (should be double the channel frequency)?",
+        "test_point": "C114",
+        "target": "2x channel frequency",
+        "yes": "p4_s5",
+        "no": "p4_s4"
+      },
+      "p4_s4": {
+        "question": "L.O. frequency incorrect. Check for 38.4 MHz master clock at U38. Is 38.4 MHz present at U38?",
+        "test_point": "U38",
+        "target": "38.4 MHz",
+        "yes": "p4_trace",
+        "no": "p4_tcxo"
+      },
+      "p4_tcxo": {
+        "result": true,
+        "component": "TCXO (Temperature Compensated Crystal Oscillator)",
+        "action": "Master clock at U38 absent/incorrect. The TCXO is faulty — replace the TCXO.",
+        "ok": false
+      },
+      "p4_trace": {
+        "result": true,
+        "component": "Local Oscillator Trace / Path",
+        "action": "38.4 MHz present at U38 but L.O. is wrong. Evaluate the local oscillator trace and downstream components for fault.",
+        "ok": false
+      },
+      "p4_s5": {
+        "question": "L.O. is correct. Check voltage at inductor L37. Is the voltage reading 1.2V?",
+        "test_point": "L37",
+        "target": "1.2V",
+        "yes": "p4_u4",
+        "no": "p4_u21"
+      },
+      "p4_u4": {
+        "result": true,
+        "component": "U4 (Rx IC)",
+        "action": "Voltage at L37 correct (1.2V) but no reception. U4 is faulty — replace it.",
+        "ok": false
+      },
+      "p4_u21": {
+        "result": true,
+        "component": "U21 (Voltage Regulator)",
+        "action": "Voltage at L37 absent/incorrect. U21 voltage regulator is faulty — replace it.",
+        "ok": false
+      }
+    }
+  },
+
+  "P5": {
+    "name": "Transmitter (Tx) Path",
+    "description": "Followed whenever there is a transmission problem",
+    "start": "p5_s1",
+    "states": {
+      "p5_s1": {
+        "question": "Press the PTT switch and observe the status LED. Does the RED LED glow when PTT is pressed?",
+        "test_point": "Status LED",
+        "target": "RED LED ON",
+        "yes": "p5_b5",
+        "no": "p5_a2"
+      },
+      "p5_a2": {
+        "question": "[Branch A] Red LED does not glow. Check SW 5 — does it short when PTT is pressed?",
+        "test_point": "SW 5",
+        "target": "Short on press",
+        "yes": "p5_a3",
+        "no": "p5_sw5"
+      },
+      "p5_sw5": {
+        "result": true,
+        "component": "SW 5 (PTT Switch)",
+        "action": "SW 5 does not short on PTT press. SW 5 is faulty — replace the PTT switch.",
+        "ok": false
+      },
+      "p5_a3": {
+        "question": "[Branch A] Check for toggling signal at R248 when PTT is pressed. Is there toggling?",
+        "test_point": "R248",
+        "target": "Toggle on PTT",
+        "yes": "p5_a4",
+        "no": "p5_ctrl"
+      },
+      "p5_ctrl": {
+        "result": true,
+        "component": "Controller (MCU)",
+        "action": "No toggling at R248 on PTT press. Controller (MCU) is faulty — replace the baseband/controller card.",
+        "ok": false
+      },
+      "p5_a4": {
+        "question": "[Branch A] Check voltage at L37. Is it reading 1.2V?",
+        "test_point": "L37",
+        "target": "1.2V",
+        "yes": "p5_u4_a",
+        "no": "p5_u21_a"
+      },
+      "p5_u4_a": {
+        "result": true,
+        "component": "U4 (Tx IC)",
+        "action": "Voltage at L37 is 1.2V but LED still not glowing. U4 is faulty — replace it.",
+        "ok": false
+      },
+      "p5_u21_a": {
+        "result": true,
+        "component": "U21 (Voltage Regulator)",
+        "action": "Voltage at L37 incorrect. U21 voltage regulator is faulty — replace it.",
+        "ok": false
+      },
+      "p5_b5": {
+        "question": "[Branch B] Red LED glows (PTT active). Check for 38.4 MHz signal at inductor L42. Is it present?",
+        "test_point": "L42",
+        "target": "38.4 MHz",
+        "yes": "p5_b6",
+        "no": "p5_u38"
+      },
+      "p5_u38": {
+        "result": true,
+        "component": "U38 (Reference Clock IC)",
+        "action": "38.4 MHz absent at L42. U38 is faulty — replace it.",
+        "ok": false
+      },
+      "p5_b6": {
+        "question": "[Branch B] Check for toggling signal at R179 when PTT is pressed. Is there toggling?",
+        "test_point": "R179",
+        "target": "Toggle on PTT",
+        "yes": "p5_pass",
+        "no": "p5_u4_b"
+      },
+      "p5_u4_b": {
+        "result": true,
+        "component": "U4 (Tx IC)",
+        "action": "No toggling at R179 on PTT. U4 is faulty — replace it.",
+        "ok": false
+      },
+      "p5_pass": {
+        "result": true,
+        "component": "Primary Tx Path — OK",
+        "action": "All specified diagnostic checks passed. Evaluate secondary downstream matching network blocks for further RF power issues.",
+        "ok": true
+      }
+    }
+  }
+}

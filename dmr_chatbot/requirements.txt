@@ -1,0 +1,23 @@
+flask>=3.0.0
+flask-cors>=4.0.0
+python-dotenv>=1.0.0
+
+# LangChain RAG pipeline
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-huggingface>=0.1.0
+faiss-cpu>=1.7.4
+sentence-transformers>=2.6.0
+
+# LLM backends (install ONE of these based on your setup)
+# Option A — Ollama client (Ollama must be installed separately)
+ollama>=0.1.8
+langchain-ollama>=0.2.0
+
+# Option B — llama-cpp-python (pure CPU inference from GGUF files)
+# Uncomment if using llama.cpp directly:
+# llama-cpp-python>=0.2.56
+
+# Utilities
+numpy>=1.24.0
+dotenv>=0.1.0

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DMR HHPC Fault Diagnosis Chatbot</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="chat-container">
+
+    <div id="chat-header">
+      <h1>DMR HHPC Fault Diagnosis Chatbot</h1>
+      <div class="header-badges">
+        <span class="tier-badge t1">Tier 1 · Rules</span>
+        <span class="tier-badge t2">Tier 2 · AI</span>
+      </div>
+      <div id="llm-status-dot" class="unavailable" title="Checking AI status…"></div>
+    </div>
+
+    <div id="chat"></div>
+
+    <div id="chat-input-area">
+      <div class="input-row">
+        <textarea
+          id="user-input"
+          rows="1"
+          placeholder="Describe the fault, or answer Yes / No…"
+          autocomplete="off"
+        ></textarea>
+        <button id="send-btn" title="Send">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-actions">
+        <button id="reset-btn">↺ Reset</button>
+        <button id="ask-ai-btn">🤖 Ask AI Knowledge Base</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/static/js/chat.js"></script>
+</body>
+</html>
